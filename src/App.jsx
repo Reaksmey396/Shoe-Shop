@@ -27,7 +27,7 @@ export default function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <BrowserRouter>
+        <BrowserRouter basename="/Shoe-Shop">
 
           <Routes>
 
@@ -84,9 +84,7 @@ export default function App() {
                 ADMIN ONLY
             ============================== */}
 
-            <Route
-              element={<ProtectedRoute />}
-            >
+            <Route element={<ProtectedRoute />}>
 
               <Route
                 path="/admin"
@@ -98,8 +96,10 @@ export default function App() {
                 element={<AdminCategories />}
               />
 
-              <Route path="/admin/orders" element={<AdminOrder />} />
-
+              <Route
+                path="/admin/orders"
+                element={<AdminOrder />}
+              />
 
             </Route>
 
