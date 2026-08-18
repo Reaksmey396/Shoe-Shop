@@ -619,7 +619,7 @@ export default function Services() {
                             }
                             className="inline-flex items-center gap-2 bg-gray-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white hover:bg-orange-600"
                           >
-                            Detail
+                            See Detail
 
                             <i className="fa-solid fa-arrow-right text-[10px]" />
                           </button>

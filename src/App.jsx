@@ -22,6 +22,7 @@ import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminCategories from "./pages/AdminCategories";
 import AdminOrder from "./pages/AdminOrder";
+import AdminUser from "./pages/AdminUser";
 
 export default function App() {
   return (
@@ -99,6 +100,11 @@ export default function App() {
               <Route
                 path="/admin/orders"
                 element={<AdminOrder />}
+              />
+
+              <Route
+                path="/admin/users"
+                element={<AdminUser />}
               />
 
             </Route>

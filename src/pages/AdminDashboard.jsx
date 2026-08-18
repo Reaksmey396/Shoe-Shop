@@ -14,6 +14,7 @@ import Sidebar from "../components/Sidebar";
 import AdminCategories from "./AdminCategories";
 import AdminOrder from "./AdminOrder";
 import AdminProduct from "./AdminProduct";
+import AdminUser from "./AdminUser";
 
 /* =========================================================
    HELPERS
@@ -1783,6 +1784,12 @@ export default function AdminDashboard() {
 
         {active === "Order" && (
           <AdminOrder />
+        )}
+
+        {/* USER */}
+
+        {active === "User" && (
+          <AdminUser />
         )}
 
         {/* DASHBOARD */}
