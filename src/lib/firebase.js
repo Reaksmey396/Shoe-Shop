@@ -17,6 +17,7 @@ const isFirebaseConfigured =
   Boolean(firebaseConfig.authDomain) &&
   Boolean(firebaseConfig.projectId) &&
   Boolean(firebaseConfig.storageBucket) &&
+  Boolean(firebaseConfig.messagingSenderId) &&
   Boolean(firebaseConfig.appId);
 
 let app = null;
@@ -26,7 +27,6 @@ let storage = null;
 
 if (isFirebaseConfigured) {
   app = initializeApp(firebaseConfig);
-
   auth = getAuth(app);
   db = getFirestore(app);
   storage = getStorage(app);
