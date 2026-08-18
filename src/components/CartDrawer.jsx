@@ -81,9 +81,6 @@ export default function CartDrawer() {
 
   // =======================================================
   // PRODUCTS TOTAL
-  //
-  // Always calculate from the actual cart items.
-  // Do not depend only on totalPrice from context.
   // =======================================================
 
   const productsTotal = cart.reduce((sum, item) => {
@@ -110,10 +107,6 @@ export default function CartDrawer() {
 
   // =======================================================
   // FINAL TOTAL
-  //
-  // THIS IS THE IMPORTANT CALCULATION.
-  //
-  // Products + service fee
   // =======================================================
 
   const finalTotal =
@@ -153,8 +146,6 @@ export default function CartDrawer() {
 
   // =======================================================
   // STEP 1
-  //
-  // USER CLICKS OKAY
   // =======================================================
 
   const handleContinueToConfirm = (event) => {
@@ -211,8 +202,6 @@ export default function CartDrawer() {
 
       // ===================================================
       // CALCULATE EVERYTHING AGAIN BEFORE SAVING
-      //
-      // This prevents stale React values.
       // ===================================================
 
       const firebaseProductsTotal =
@@ -244,8 +233,6 @@ export default function CartDrawer() {
 
       // ===================================================
       // PREPARE CART ITEMS
-      //
-      // Save a snapshot of the products at order time.
       // ===================================================
 
       const orderItems = cart.map(
@@ -295,16 +282,8 @@ export default function CartDrawer() {
       // ===================================================
 
       const orderData = {
-        // -------------------------------------------------
-        // ORDER IDENTIFICATION
-        // -------------------------------------------------
-
         orderNumber:
           generatedOrderNumber,
-
-        // -------------------------------------------------
-        // USER
-        // -------------------------------------------------
 
         userId: user.uid || "",
 
@@ -312,10 +291,6 @@ export default function CartDrawer() {
 
         customerId:
           user.uid || "",
-
-        // -------------------------------------------------
-        // CUSTOMER
-        // -------------------------------------------------
 
         customerName:
           user.displayName ||
@@ -327,10 +302,6 @@ export default function CartDrawer() {
 
         email:
           user.email || "",
-
-        // -------------------------------------------------
-        // CUSTOMER INPUT
-        // -------------------------------------------------
 
         phone:
           phone.trim(),
@@ -350,10 +321,6 @@ export default function CartDrawer() {
         note:
           note.trim(),
 
-        // -------------------------------------------------
-        // PRODUCTS
-        // -------------------------------------------------
-
         items:
           orderItems,
 
@@ -367,18 +334,10 @@ export default function CartDrawer() {
             0
           ),
 
-        // -------------------------------------------------
-        // PRODUCT TOTAL
-        // -------------------------------------------------
-
         productsTotal:
           Number(
             firebaseProductsTotal.toFixed(2)
           ),
-
-        // -------------------------------------------------
-        // SERVICE
-        // -------------------------------------------------
 
         servicePlan:
           servicePlan,
@@ -388,10 +347,6 @@ export default function CartDrawer() {
 
         plan:
           servicePlan,
-
-        // -------------------------------------------------
-        // SERVICE PRICE
-        // -------------------------------------------------
 
         serviceExtraPrice:
           Number(
@@ -406,14 +361,6 @@ export default function CartDrawer() {
               2
             )
           ),
-
-        // -------------------------------------------------
-        // FINAL TOTAL
-        //
-        // IMPORTANT:
-        // totalPrice is ALSO the final amount.
-        // This makes AdminOrder compatible.
-        // -------------------------------------------------
 
         finalTotal:
           Number(
@@ -435,16 +382,8 @@ export default function CartDrawer() {
             firebaseFinalTotal.toFixed(2)
           ),
 
-        // -------------------------------------------------
-        // STATUS
-        // -------------------------------------------------
-
         status:
           "Received",
-
-        // -------------------------------------------------
-        // TIMESTAMP
-        // -------------------------------------------------
 
         createdAt:
           serverTimestamp(),
@@ -547,9 +486,6 @@ export default function CartDrawer() {
         "Firebase order error:",
         error
       );
-
-      // Keep modal open so user can try again.
-      // No browser alert.
     } finally {
       setPlacingOrder(false);
     }
@@ -572,14 +508,14 @@ export default function CartDrawer() {
     plan
   ) => {
     return `
-      rounded-lg
+      rounded-2xl
       border
-      p-3
+      p-4
       text-left
       transition
       ${
         servicePlan === plan
-          ? "border-orange-500 bg-orange-50 ring-1 ring-orange-500"
+          ? "border-orange-500 bg-orange-50 ring-2 ring-orange-100"
           : "border-gray-200 bg-white hover:bg-gray-50"
       }
     `;
@@ -838,11 +774,10 @@ export default function CartDrawer() {
               )}
 
             </div>
+
           )}
 
-          {/* =================================================
-              CART TOTAL
-          ================================================= */}
+          {/* CART TOTAL */}
 
           {cart.length > 0 && (
 
@@ -898,34 +833,54 @@ export default function CartDrawer() {
               </Link>
 
             </div>
+
           )}
 
         </div>
       </div>
 
+
       {/* ===================================================
           STEP 1
-          ORDER INFORMATION
+          COMPLETE YOUR ORDER
       =================================================== */}
 
       {showOrderModal && (
 
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
 
-          <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white shadow-2xl">
+          {/* OUTER MODAL
+              rounded-3xl = all 4 corners rounded
+          */}
 
-            {/* HEADER */}
+          <div className="flex max-h-[92vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
 
-            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+            {/* =================================================
+                HEADER
+            ================================================= */}
 
-              <div>
-                <h2 className="text-lg font-extrabold text-gray-950">
-                  Complete Your Order
-                </h2>
+            <div className="flex shrink-0 items-center justify-between border-b border-gray-100 bg-white px-6 py-5">
 
-                <p className="mt-1 text-xs text-gray-500">
-                  Enter your order information.
-                </p>
+              <div className="flex min-w-0 items-center gap-3">
+
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
+
+                  <i className="fa-solid fa-cart-shopping text-lg" />
+
+                </div>
+
+                <div className="min-w-0">
+
+                  <h2 className="text-lg font-extrabold text-gray-950">
+                    Complete Your Order
+                  </h2>
+
+                  <p className="mt-1 text-xs text-gray-500">
+                    Enter your order information.
+                  </p>
+
+                </div>
+
               </div>
 
               <button
@@ -938,279 +893,432 @@ export default function CartDrawer() {
                 disabled={
                   placingOrder
                 }
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
+                className="ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500 transition hover:bg-gray-200 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <i className="fa-solid fa-xmark" />
+                <i className="fa-solid fa-xmark text-lg" />
               </button>
 
             </div>
 
-            {/* FORM */}
 
-            <form
-              onSubmit={
-                handleContinueToConfirm
-              }
-              className="space-y-4 p-5"
-            >
+            {/* =================================================
+                SCROLLABLE BODY
+            ================================================= */}
 
-              {/* PHONE */}
+            <div className="min-h-0 flex-1 overflow-y-auto">
 
-              <div>
+              <form
+                onSubmit={
+                  handleContinueToConfirm
+                }
+                className="space-y-4 px-6 py-6"
+              >
 
-                <label className="text-sm font-bold text-gray-800">
-                  Phone Number
-                </label>
+                {/* =================================================
+                    PHONE
+                ================================================= */}
 
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(event) =>
-                    setPhone(
-                      event.target.value
-                    )
-                  }
-                  placeholder="Enter phone number"
-                  className="mt-1.5 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-orange-500"
-                  required
-                />
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
 
-              </div>
+                  <label className="mb-2 flex items-center gap-2 text-sm font-bold text-gray-800">
 
-              {/* LOCATION */}
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-orange-600 shadow-sm">
 
-              <div>
+                      <i className="fa-solid fa-phone text-xs" />
 
-                <label className="text-sm font-bold text-gray-800">
-                  Location
-                </label>
+                    </span>
 
-                <textarea
-                  value={location}
-                  onChange={(event) =>
-                    setLocation(
-                      event.target.value
-                    )
-                  }
-                  placeholder="Enter your location"
-                  rows={2}
-                  className="mt-1.5 w-full resize-none rounded-lg border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-orange-500"
-                  required
-                />
+                    <span>
+                      Phone Number
+                    </span>
 
-              </div>
+                  </label>
 
-              {/* NOTE */}
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(event) =>
+                      setPhone(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Enter phone number"
+                    disabled={
+                      placingOrder
+                    }
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 disabled:cursor-not-allowed disabled:bg-gray-100"
+                    required
+                  />
 
-              <div>
+                </div>
 
-                <label className="text-sm font-bold text-gray-800">
-                  Note
 
-                  <span className="ml-2 font-normal text-gray-400">
-                    Optional
-                  </span>
-                </label>
+                {/* =================================================
+                    LOCATION
+                ================================================= */}
 
-                <textarea
-                  value={note}
-                  onChange={(event) =>
-                    setNote(
-                      event.target.value
-                    )
-                  }
-                  placeholder="Any special instructions?"
-                  rows={2}
-                  className="mt-1.5 w-full resize-none rounded-lg border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-orange-500"
-                />
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
 
-              </div>
+                  <label className="mb-2 flex items-center gap-2 text-sm font-bold text-gray-800">
 
-              {/* SERVICE */}
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-orange-600 shadow-sm">
 
-              <div>
+                      <i className="fa-solid fa-location-dot text-xs" />
 
-                <label className="text-sm font-bold text-gray-800">
-                  Service Plan
-                </label>
+                    </span>
 
-                <div className="mt-2 grid grid-cols-3 gap-2">
+                    <span>
+                      Location
+                    </span>
 
-                  {/* FREE */}
+                  </label>
+
+                  <textarea
+                    value={location}
+                    onChange={(event) =>
+                      setLocation(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Enter your location"
+                    rows={3}
+                    disabled={
+                      placingOrder
+                    }
+                    className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 disabled:cursor-not-allowed disabled:bg-gray-100"
+                    required
+                  />
+
+                </div>
+
+
+                {/* =================================================
+                    NOTE
+                ================================================= */}
+
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+
+                  <label className="mb-2 flex items-center gap-2 text-sm font-bold text-gray-800">
+
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-orange-600 shadow-sm">
+
+                      <i className="fa-solid fa-note-sticky text-xs" />
+
+                    </span>
+
+                    <span>
+                      Note
+                    </span>
+
+                    <span className="font-normal text-gray-400">
+                      Optional
+                    </span>
+
+                  </label>
+
+                  <textarea
+                    value={note}
+                    onChange={(event) =>
+                      setNote(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Any special instructions?"
+                    rows={3}
+                    disabled={
+                      placingOrder
+                    }
+                    className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 disabled:cursor-not-allowed disabled:bg-gray-100"
+                  />
+
+                </div>
+
+
+                {/* =================================================
+                    SERVICE PLAN
+                ================================================= */}
+
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+
+                  <div className="flex items-center justify-between">
+
+                    <label className="flex items-center gap-2 text-sm font-bold text-gray-800">
+
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-orange-600 shadow-sm">
+
+                        <i className="fa-solid fa-list-check text-xs" />
+
+                      </span>
+
+                      Service Plan
+
+                    </label>
+
+                    <span className="rounded-full bg-orange-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-orange-600">
+                      Choose One
+                    </span>
+
+                  </div>
+
+
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+
+                    {/* FREE */}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        selectService(
+                          "Free"
+                        )
+                      }
+                      disabled={
+                        placingOrder
+                      }
+                      className={`
+                        ${serviceButtonClass(
+                          "Free"
+                        )}
+                        disabled:cursor-not-allowed
+                        disabled:opacity-50
+                      `}
+                    >
+
+                      <div className="flex items-start justify-between">
+
+                        <div>
+
+                          <p className="font-bold text-gray-900">
+                            Free
+                          </p>
+
+                          <p className="mt-1 text-xs text-gray-500">
+                            Included
+                          </p>
+
+                        </div>
+
+                        {servicePlan ===
+                          "Free" && (
+                          <i className="fa-solid fa-circle-check text-orange-600" />
+                        )}
+
+                      </div>
+
+                      <p className="mt-3 text-sm font-extrabold text-orange-600">
+                        +$0
+                      </p>
+
+                    </button>
+
+
+                    {/* PLUS */}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        selectService(
+                          "Plus"
+                        )
+                      }
+                      disabled={
+                        placingOrder
+                      }
+                      className={`
+                        ${serviceButtonClass(
+                          "Plus"
+                        )}
+                        disabled:cursor-not-allowed
+                        disabled:opacity-50
+                      `}
+                    >
+
+                      <div className="flex items-start justify-between">
+
+                        <div>
+
+                          <p className="font-bold text-gray-900">
+                            Plus
+                          </p>
+
+                          <p className="mt-1 text-xs text-gray-500">
+                            Extra care
+                          </p>
+
+                        </div>
+
+                        {servicePlan ===
+                          "Plus" && (
+                          <i className="fa-solid fa-circle-check text-orange-600" />
+                        )}
+
+                      </div>
+
+                      <p className="mt-3 text-sm font-extrabold text-orange-600">
+                        +$5
+                      </p>
+
+                    </button>
+
+
+                    {/* PRO */}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        selectService(
+                          "Pro"
+                        )
+                      }
+                      disabled={
+                        placingOrder
+                      }
+                      className={`
+                        ${serviceButtonClass(
+                          "Pro"
+                        )}
+                        disabled:cursor-not-allowed
+                        disabled:opacity-50
+                      `}
+                    >
+
+                      <div className="flex items-start justify-between">
+
+                        <div>
+
+                          <p className="font-bold text-gray-900">
+                            Pro
+                          </p>
+
+                          <p className="mt-1 text-xs text-gray-500">
+                            Premium care
+                          </p>
+
+                        </div>
+
+                        {servicePlan ===
+                          "Pro" && (
+                          <i className="fa-solid fa-circle-check text-orange-600" />
+                        )}
+
+                      </div>
+
+                      <p className="mt-3 text-sm font-extrabold text-orange-600">
+                        +$10
+                      </p>
+
+                    </button>
+
+                  </div>
+
+                </div>
+
+
+                {/* =================================================
+                    LIVE TOTAL
+                ================================================= */}
+
+                <div className="rounded-2xl border border-orange-100 bg-orange-50 p-5">
+
+                  <div className="flex justify-between text-sm text-gray-600">
+
+                    <span>
+                      Products
+                    </span>
+
+                    <span className="font-semibold text-gray-900">
+                      {formatMoney(
+                        productsTotal
+                      )}
+                    </span>
+
+                  </div>
+
+
+                  <div className="mt-3 flex justify-between text-sm text-gray-600">
+
+                    <span>
+                      {servicePlan} service
+                    </span>
+
+                    <span className="font-semibold text-orange-600">
+                      +
+                      {formatMoney(
+                        serviceExtraPrice
+                      )}
+                    </span>
+
+                  </div>
+
+
+                  <div className="mt-4 flex items-end justify-between border-t border-orange-200 pt-4">
+
+                    <div>
+
+                      <p className="text-sm font-bold text-gray-700">
+                        Final Total
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-400">
+                        Including service fee
+                      </p>
+
+                    </div>
+
+                    <span className="text-2xl font-extrabold text-orange-600">
+                      {formatMoney(
+                        finalTotal
+                      )}
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                {/* =================================================
+                    BUTTONS
+                ================================================= */}
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
 
                   <button
                     type="button"
                     onClick={() =>
-                      selectService(
-                        "Free"
+                      setShowOrderModal(
+                        false
                       )
                     }
-                    className={
-                      serviceButtonClass(
-                        "Free"
-                      )
+                    disabled={
+                      placingOrder
                     }
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <p className="font-bold text-gray-900">
-                      Free
-                    </p>
-
-                    <p className="mt-1 text-xs text-gray-500">
-                      Included
-                    </p>
-
-                    <p className="mt-2 text-sm font-extrabold text-orange-600">
-                      +$0
-                    </p>
+                    Cancel
                   </button>
-
-                  {/* PLUS */}
 
                   <button
-                    type="button"
-                    onClick={() =>
-                      selectService(
-                        "Plus"
-                      )
+                    type="submit"
+                    disabled={
+                      placingOrder
                     }
-                    className={
-                      serviceButtonClass(
-                        "Plus"
-                      )
-                    }
+                    className="rounded-xl bg-orange-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:bg-gray-400"
                   >
-                    <p className="font-bold text-gray-900">
-                      Plus
-                    </p>
-
-                    <p className="mt-1 text-xs text-gray-500">
-                      Extra care
-                    </p>
-
-                    <p className="mt-2 text-sm font-extrabold text-orange-600">
-                      +$5
-                    </p>
-                  </button>
-
-                  {/* PRO */}
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      selectService(
-                        "Pro"
-                      )
-                    }
-                    className={
-                      serviceButtonClass(
-                        "Pro"
-                      )
-                    }
-                  >
-                    <p className="font-bold text-gray-900">
-                      Pro
-                    </p>
-
-                    <p className="mt-1 text-xs text-gray-500">
-                      Premium care
-                    </p>
-
-                    <p className="mt-2 text-sm font-extrabold text-orange-600">
-                      +$10
-                    </p>
+                    Okay
                   </button>
 
                 </div>
 
-              </div>
+              </form>
 
-              {/* =================================================
-                  LIVE TOTAL
-              ================================================= */}
-
-              <div className="rounded-xl bg-gray-50 p-4">
-
-                <div className="flex justify-between text-sm text-gray-600">
-
-                  <span>
-                    Products
-                  </span>
-
-                  <span className="font-medium text-gray-900">
-                    {formatMoney(
-                      productsTotal
-                    )}
-                  </span>
-
-                </div>
-
-                <div className="mt-2 flex justify-between text-sm text-gray-600">
-
-                  <span>
-                    {servicePlan} service
-                  </span>
-
-                  <span className="font-medium text-orange-600">
-                    +
-                    {formatMoney(
-                      serviceExtraPrice
-                    )}
-                  </span>
-
-                </div>
-
-                <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3">
-
-                  <span className="font-extrabold text-gray-900">
-                    Final Total
-                  </span>
-
-                  <span className="text-2xl font-extrabold text-orange-600">
-                    {formatMoney(
-                      finalTotal
-                    )}
-                  </span>
-
-                </div>
-
-              </div>
-
-              {/* BUTTONS */}
-
-              <div className="grid grid-cols-2 gap-3 pt-1">
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowOrderModal(
-                      false
-                    )
-                  }
-                  disabled={
-                    placingOrder
-                  }
-                  className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={
-                    placingOrder
-                  }
-                  className="rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-orange-700"
-                >
-                  Okay
-                </button>
-
-              </div>
-
-            </form>
+            </div>
 
           </div>
+
         </div>
+
       )}
+
 
       {/* ===================================================
           STEP 2
@@ -1335,6 +1443,7 @@ export default function CartDrawer() {
                   }
                 `}
               >
+
                 {placingOrder ? (
                   <>
                     <i className="fa-solid fa-spinner fa-spin mr-2" />
@@ -1343,13 +1452,17 @@ export default function CartDrawer() {
                 ) : (
                   "Submit"
                 )}
+
               </button>
 
             </div>
 
           </div>
+
         </div>
+
       )}
+
 
       {/* ===================================================
           STEP 3
@@ -1491,6 +1604,7 @@ export default function CartDrawer() {
             </div>
 
           </div>
+
         )}
 
     </>

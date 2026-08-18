@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 import {
   collection,
   onSnapshot,
@@ -8,10 +9,27 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../lib/firebase";
+import { useAuth } from "../context/AuthContext";
 
 const INITIAL_LIMIT = 6;
 
 export default function Services() {
+  const navigate = useNavigate();
+
+  /*
+  =========================================================
+  AUTHENTICATION
+  =========================================================
+  */
+
+  const { user } = useAuth();
+
+  /*
+  =========================================================
+  STATE
+  =========================================================
+  */
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
 
@@ -21,13 +39,38 @@ export default function Services() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  /* =========================================================
-     LOAD REAL PRODUCTS
-  ========================================================= */
+  /*
+  =========================================================
+  LOGIN MODAL
+  =========================================================
+  */
+
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  /*
+  =========================================================
+  LOAD PRODUCTS
+  =========================================================
+  */
 
   useEffect(() => {
     setLoading(true);
     setError("");
+
+    /*
+    If Firebase is not configured,
+    stop here instead of crashing the page.
+    */
+
+    if (!db) {
+      setError(
+        "Firebase is not configured. Please check your Firebase settings."
+      );
+
+      setLoading(false);
+
+      return;
+    }
 
     const productsQuery = query(
       collection(db, "products"),
@@ -45,6 +88,7 @@ export default function Services() {
         setProducts(data);
         setLoading(false);
       },
+
       (firebaseError) => {
         console.error(
           "Products Firebase error:",
@@ -62,11 +106,17 @@ export default function Services() {
     return () => unsubscribeProducts();
   }, []);
 
-  /* =========================================================
-     LOAD REAL CATEGORIES
-  ========================================================= */
+  /*
+  =========================================================
+  LOAD CATEGORIES
+  =========================================================
+  */
 
   useEffect(() => {
+    if (!db) {
+      return;
+    }
+
     const unsubscribeCategories = onSnapshot(
       collection(db, "categories"),
       (snapshot) => {
@@ -77,6 +127,7 @@ export default function Services() {
 
         setCategories(data);
       },
+
       (firebaseError) => {
         console.error(
           "Categories Firebase error:",
@@ -88,12 +139,11 @@ export default function Services() {
     return () => unsubscribeCategories();
   }, []);
 
-  /* =========================================================
-     NORMALIZE PRODUCT DATA
-     
-     This allows AdminProduct to use different common
-     field names without breaking this page.
-  ========================================================= */
+  /*
+  =========================================================
+  NORMALIZE PRODUCT DATA
+  =========================================================
+  */
 
   const normalizedProducts = useMemo(() => {
     return products.map((product) => {
@@ -134,9 +184,7 @@ export default function Services() {
         product.turnaround ||
         "3-5 Days";
 
-      const features = Array.isArray(
-        product.features
-      )
+      const features = Array.isArray(product.features)
         ? product.features
         : [];
 
@@ -154,14 +202,18 @@ export default function Services() {
     });
   }, [products]);
 
-  /* =========================================================
-     CATEGORY FILTERS
-     
-     Categories come from Admin Categories.
-  ========================================================= */
+  /*
+  =========================================================
+  CATEGORY FILTERS
+  =========================================================
+  */
 
   const filters = useMemo(() => {
     const categoryNames = [];
+
+    /*
+    Categories from Firebase categories collection
+    */
 
     categories.forEach((category) => {
       const name =
@@ -175,10 +227,8 @@ export default function Services() {
     });
 
     /*
-     * Also include categories that exist on products
-     * even if the category collection does not contain
-     * them.
-     */
+    Also include categories from products
+    */
 
     normalizedProducts.forEach((product) => {
       if (
@@ -189,6 +239,10 @@ export default function Services() {
       }
     });
 
+    /*
+    Remove duplicate categories
+    */
+
     const uniqueCategories = [
       ...new Set(categoryNames),
     ];
@@ -198,6 +252,7 @@ export default function Services() {
         key: "all",
         label: "All",
       },
+
       ...uniqueCategories.map((category) => ({
         key: category,
         label: category,
@@ -205,9 +260,11 @@ export default function Services() {
     ];
   }, [categories, normalizedProducts]);
 
-  /* =========================================================
-     FILTER PRODUCTS
-  ========================================================= */
+  /*
+  =========================================================
+  FILTER PRODUCTS
+  =========================================================
+  */
 
   const filtered = useMemo(() => {
     if (activeFilter === "all") {
@@ -221,9 +278,11 @@ export default function Services() {
     );
   }, [activeFilter, normalizedProducts]);
 
-  /* =========================================================
-     VISIBLE PRODUCTS
-  ========================================================= */
+  /*
+  =========================================================
+  VISIBLE PRODUCTS
+  =========================================================
+  */
 
   const visible = showAll
     ? filtered
@@ -232,9 +291,11 @@ export default function Services() {
   const hasMore =
     filtered.length > INITIAL_LIMIT && !showAll;
 
-  /* =========================================================
-     BADGE COLORS
-  ========================================================= */
+  /*
+  =========================================================
+  BADGE COLORS
+  =========================================================
+  */
 
   const getBadgeColor = (category) => {
     const value = String(category || "").toLowerCase();
@@ -257,9 +318,11 @@ export default function Services() {
     return "bg-gray-950";
   };
 
-  /* =========================================================
-     PRICE FORMAT
-  ========================================================= */
+  /*
+  =========================================================
+  PRICE FORMAT
+  =========================================================
+  */
 
   const formatPrice = (price) => {
     if (
@@ -277,27 +340,69 @@ export default function Services() {
     return `$${number.toFixed(2)}`;
   };
 
-  /* =========================================================
-     RESET SHOW ALL WHEN FILTER CHANGES
-  ========================================================= */
+  /*
+  =========================================================
+  CHANGE FILTER
+  =========================================================
+  */
 
   const changeFilter = (filter) => {
     setActiveFilter(filter);
     setShowAll(false);
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
+  /*
+  =========================================================
+  HANDLE DETAIL
+  =========================================================
+  */
+
+  const handleDetail = (serviceId) => {
+    /*
+    If user is NOT logged in,
+    show login modal.
+    */
+
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    /*
+    If user is logged in,
+    go directly to service detail.
+    */
+
+    navigate(`/services/${serviceId}`);
+  };
+
+  /*
+  =========================================================
+  GO TO LOGIN
+  =========================================================
+  */
+
+  const handleLogin = () => {
+    setShowLoginModal(false);
+    navigate("/login");
+  };
+
+  /*
+  =========================================================
+  RENDER
+  =========================================================
+  */
 
   return (
     <main className="pt-[72px] bg-[#f7f8fc] text-gray-950">
+
       {/* =====================================================
           HERO
       ===================================================== */}
 
       <section className="py-16 md:py-24">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 lg:grid-cols-2 lg:gap-20">
+
           {/* HERO TEXT */}
 
           <div>
@@ -319,12 +424,14 @@ export default function Services() {
             </p>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <Link
-                to="/about"
+
+              <button
+                type="button"
+                onClick={() => navigate("/about")}
                 className="inline-flex justify-center bg-orange-600 px-6 py-3 text-xs font-bold uppercase tracking-wide text-white hover:bg-red-600"
               >
                 Learn More
-              </Link>
+              </button>
 
               <a
                 href="#services"
@@ -332,6 +439,7 @@ export default function Services() {
               >
                 View Services
               </a>
+
             </div>
           </div>
 
@@ -342,6 +450,7 @@ export default function Services() {
             alt="Sneaker cleaning and restoration workbench"
             className="aspect-[5/4] w-full object-cover shadow-xl"
           />
+
         </div>
       </section>
 
@@ -354,9 +463,11 @@ export default function Services() {
         className="bg-white py-16 md:py-20"
       >
         <div className="mx-auto max-w-7xl px-6">
+
           {/* HEADER */}
 
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-orange-600">
                 Service Options
@@ -393,6 +504,7 @@ export default function Services() {
                 </button>
               ))}
             </div>
+
           </div>
 
           {/* =================================================
@@ -412,30 +524,38 @@ export default function Services() {
 
           {loading ? (
             <div className="flex min-h-[350px] items-center justify-center">
+
               <div className="text-center">
+
                 <i className="fa-solid fa-spinner fa-spin text-3xl text-orange-600" />
 
                 <p className="mt-4 text-sm text-gray-500">
                   Loading services...
                 </p>
+
               </div>
+
             </div>
           ) : (
             <>
+
               {/* =============================================
                   PRODUCT GRID
               ============================================= */}
 
               {visible.length > 0 ? (
                 <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+
                   {visible.map((item) => (
                     <article
                       key={item.id}
                       className="group border border-gray-200 bg-[#f7f8fc] p-4 hover:border-orange-600"
                     >
+
                       {/* IMAGE */}
 
                       <div className="relative overflow-hidden bg-white">
+
                         <span
                           className={`absolute left-3 top-3 z-10 px-3 py-1 text-[10px] font-bold uppercase text-white ${getBadgeColor(
                             item.category
@@ -452,20 +572,26 @@ export default function Services() {
                           />
                         ) : (
                           <div className="grid h-56 w-full place-items-center bg-gray-100">
+
                             <div className="text-center">
+
                               <i className="fa-solid fa-image text-4xl text-gray-300" />
 
                               <p className="mt-2 text-xs text-gray-400">
                                 No image
                               </p>
+
                             </div>
+
                           </div>
                         )}
+
                       </div>
 
                       {/* CONTENT */}
 
                       <div className="pt-5">
+
                         <p className="text-[10px] font-bold uppercase tracking-widest text-orange-600">
                           {item.category}
                         </p>
@@ -481,30 +607,43 @@ export default function Services() {
                         {/* PRICE + DETAIL */}
 
                         <div className="mt-5 flex items-center justify-between gap-3">
+
                           <p className="font-extrabold text-orange-600">
                             {formatPrice(item.price)}
                           </p>
 
-                          <Link
-                            to={`/services/${item.id}`}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDetail(item.id)
+                            }
                             className="inline-flex items-center gap-2 bg-gray-950 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white hover:bg-orange-600"
                           >
                             Detail
+
                             <i className="fa-solid fa-arrow-right text-[10px]" />
-                          </Link>
+                          </button>
+
                         </div>
+
                       </div>
+
                     </article>
                   ))}
+
                 </div>
               ) : (
+
                 /* =============================================
                    EMPTY
                 ============================================= */
 
                 <div className="mt-10 border border-gray-200 bg-[#f7f8fc] px-6 py-16 text-center">
+
                   <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gray-100">
+
                     <i className="fa-solid fa-box-open text-2xl text-gray-400" />
+
                   </div>
 
                   <h3 className="mt-5 text-lg font-bold">
@@ -527,6 +666,7 @@ export default function Services() {
                       View All Services
                     </button>
                   )}
+
                 </div>
               )}
 
@@ -536,6 +676,7 @@ export default function Services() {
 
               {hasMore && (
                 <div className="mt-10 flex justify-center">
+
                   <button
                     type="button"
                     onClick={() =>
@@ -547,15 +688,18 @@ export default function Services() {
 
                     <i className="fa-solid fa-arrow-down" />
                   </button>
+
                 </div>
               )}
 
-              {/* SHOW LESS */}
+              {/* =================================================
+                  SHOW LESS
+              ================================================= */}
 
               {showAll &&
-                filtered.length >
-                  INITIAL_LIMIT && (
+                filtered.length > INITIAL_LIMIT && (
                   <div className="mt-10 flex justify-center">
+
                     <button
                       type="button"
                       onClick={() =>
@@ -567,12 +711,87 @@ export default function Services() {
 
                       <i className="fa-solid fa-arrow-up" />
                     </button>
+
                   </div>
                 )}
+
             </>
           )}
+
         </div>
       </section>
+
+      {/* =====================================================
+          LOGIN REQUIRED MODAL
+      ===================================================== */}
+
+      {showLoginModal && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 px-6 backdrop-blur-sm"
+          onClick={() =>
+            setShowLoginModal(false)
+          }
+        >
+
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            {/* ICON */}
+
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-100">
+              <i className="fa-solid fa-lock text-2xl text-orange-600" />
+            </div>
+
+            {/* TITLE */}
+
+            <h2 className="mt-6 text-center text-2xl font-extrabold text-gray-950">
+              Login Required
+            </h2>
+
+            {/* MESSAGE */}
+
+            <p className="mt-3 text-center text-sm leading-6 text-gray-600">
+              Please login to your account before
+              viewing the service details.
+            </p>
+
+            {/* BUTTONS */}
+
+            <div className="mt-7 grid grid-cols-2 gap-3">
+
+              {/* BACK */}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowLoginModal(false)
+                }
+                className="border border-gray-300 px-5 py-3 text-sm font-bold text-gray-700 transition hover:border-gray-950 hover:bg-gray-950 hover:text-white"
+              >
+                Back
+              </button>
+
+              {/* LOGIN */}
+
+              <button
+                type="button"
+                onClick={handleLogin}
+                className="bg-orange-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-600"
+              >
+                Login
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
     </main>
   );
 }

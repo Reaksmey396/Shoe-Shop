@@ -32,13 +32,14 @@ export default function AdminCategories() {
 
   const [showModal, setShowModal] = useState(false);
 
-  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingCategory, setEditingCategory] =
+    useState(null);
 
   const [name, setName] = useState("");
 
-  const [description, setDescription] = useState("");
+  const [description, setDescription] =
+    useState("");
 
-  // IMAGE URL ONLY
   const [imageUrl, setImageUrl] = useState("");
 
   // =====================================================
@@ -85,7 +86,9 @@ export default function AdminCategories() {
   // LOAD PRODUCT COUNTS
   // =====================================================
 
-  const loadProductCounts = async (categoryData) => {
+  const loadProductCounts = async (
+    categoryData
+  ) => {
     try {
       const snapshot = await getDocs(
         collection(db, "products")
@@ -99,10 +102,11 @@ export default function AdminCategories() {
       const counts = {};
 
       categoryData.forEach((category) => {
-        counts[category.id] = products.filter(
-          (product) =>
-            product.category === category.name
-        ).length;
+        counts[category.id] =
+          products.filter(
+            (product) =>
+              product.category === category.name
+          ).length;
       });
 
       setProductCounts(counts);
@@ -253,17 +257,12 @@ export default function AdminCategories() {
     try {
       setSaving(true);
 
-      // =================================================
-      // FIRESTORE DATA
-      // =================================================
-
       const categoryData = {
         name: name.trim(),
 
         description:
           description.trim(),
 
-        // IMAGE URL
         imageUrl:
           imageUrl.trim(),
 
@@ -280,23 +279,9 @@ export default function AdminCategories() {
           serverTimestamp(),
       };
 
-      console.log(
-        "Adding category:",
-        categoryData
-      );
-
-      // =================================================
-      // ADD FIRESTORE
-      // =================================================
-
       const docRef = await addDoc(
         collection(db, "categories"),
         categoryData
-      );
-
-      console.log(
-        "Category created:",
-        docRef.id
       );
 
       // =================================================
@@ -377,7 +362,9 @@ export default function AdminCategories() {
   // EDIT CATEGORY
   // =====================================================
 
-  const handleEditCategory = async (event) => {
+  const handleEditCategory = async (
+    event
+  ) => {
     event.preventDefault();
 
     if (saving) {
@@ -440,7 +427,6 @@ export default function AdminCategories() {
         description:
           description.trim(),
 
-        // UPDATE IMAGE URL
         imageUrl:
           imageUrl.trim(),
 
@@ -448,18 +434,13 @@ export default function AdminCategories() {
           serverTimestamp(),
       };
 
-      console.log(
-        "Updating category:",
-        updateData
-      );
-
       await updateDoc(
         categoryRef,
         updateData
       );
 
       // =================================================
-      // UPDATE REACT UI
+      // UPDATE UI
       // =================================================
 
       setCategories((previous) =>
@@ -549,7 +530,7 @@ export default function AdminCategories() {
       setSaving(true);
 
       // =================================================
-      // DELETE FIRESTORE ONLY
+      // DELETE FIRESTORE
       // =================================================
 
       await deleteDoc(
@@ -605,13 +586,17 @@ export default function AdminCategories() {
   if (authLoading) {
     return (
       <main className="p-5 sm:p-8">
+
         <div className="py-20 text-center">
+
           <i className="fa-solid fa-spinner fa-spin text-xl text-red-500" />
 
           <p className="mt-3 text-sm text-slate-500">
             Checking authentication...
           </p>
+
         </div>
+
       </main>
     );
   }
@@ -623,7 +608,9 @@ export default function AdminCategories() {
   if (!user) {
     return (
       <main className="p-5 sm:p-8">
+
         <div className="rounded-2xl border border-red-100 bg-white p-10 text-center shadow-sm">
+
           <i className="fa-solid fa-lock text-3xl text-red-400" />
 
           <h2 className="mt-4 text-xl font-semibold text-slate-900">
@@ -633,7 +620,9 @@ export default function AdminCategories() {
           <p className="mt-2 text-sm text-slate-500">
             Please login to manage categories.
           </p>
+
         </div>
+
       </main>
     );
   }
@@ -652,6 +641,7 @@ export default function AdminCategories() {
       <div className="mb-7 flex items-center justify-between">
 
         <div>
+
           <h2 className="text-2xl font-semibold text-slate-900">
             Categories
           </h2>
@@ -659,6 +649,7 @@ export default function AdminCategories() {
           <p className="mt-1 text-sm text-slate-500">
             Manage your product categories.
           </p>
+
         </div>
 
         <button
@@ -667,9 +658,11 @@ export default function AdminCategories() {
           disabled={saving}
           className="rounded-lg bg-red-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
+
           <i className="fa-solid fa-plus mr-2" />
 
           Add Category
+
         </button>
 
       </div>
@@ -684,13 +677,21 @@ export default function AdminCategories() {
 
         <div className="hidden grid-cols-[1.5fr_1.5fr_3fr_1fr_100px] gap-4 border-b border-slate-100 bg-slate-50 px-6 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500 md:grid">
 
-          <div>Name</div>
+          <div>
+            Name
+          </div>
 
-          <div>Image</div>
+          <div>
+            Image
+          </div>
 
-          <div>Description</div>
+          <div>
+            Description
+          </div>
 
-          <div>Product</div>
+          <div>
+            Product
+          </div>
 
           <div className="text-right">
             Action
@@ -698,7 +699,9 @@ export default function AdminCategories() {
 
         </div>
 
-        {/* LOADING */}
+        {/* =================================================
+            LOADING
+        ================================================= */}
 
         {loading && (
           <div className="py-16 text-center">
@@ -712,7 +715,9 @@ export default function AdminCategories() {
           </div>
         )}
 
-        {/* EMPTY */}
+        {/* =================================================
+            EMPTY
+        ================================================= */}
 
         {!loading &&
           categories.length === 0 && (
@@ -739,7 +744,9 @@ export default function AdminCategories() {
             </div>
           )}
 
-        {/* LIST */}
+        {/* =================================================
+            LIST
+        ================================================= */}
 
         {!loading &&
           categories.map((category) => (
@@ -751,9 +758,11 @@ export default function AdminCategories() {
               {/* NAME */}
 
               <div>
+
                 <p className="text-sm font-semibold text-slate-900">
                   {category.name}
                 </p>
+
               </div>
 
               {/* IMAGE */}
@@ -761,6 +770,7 @@ export default function AdminCategories() {
               <div>
 
                 {category.imageUrl ? (
+
                   <img
                     src={category.imageUrl}
                     alt={category.name}
@@ -770,14 +780,19 @@ export default function AdminCategories() {
                         "none";
                     }}
                   />
+
                 ) : (
+
                   <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100">
+
                     <img
                       src={fire}
                       alt=""
                       className="h-8 w-8"
                     />
+
                   </div>
+
                 )}
 
               </div>
@@ -785,10 +800,12 @@ export default function AdminCategories() {
               {/* DESCRIPTION */}
 
               <div>
+
                 <p className="line-clamp-2 text-sm text-slate-500">
                   {category.description ||
                     "No description"}
                 </p>
+
               </div>
 
               {/* PRODUCT */}
@@ -797,13 +814,9 @@ export default function AdminCategories() {
 
                 <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-600">
 
-                  <i className="fa-solid fa-box" />
-
                   {productCounts[
                     category.id
                   ] || 0}
-
-                  Products
 
                 </span>
 
@@ -812,6 +825,8 @@ export default function AdminCategories() {
               {/* ACTION */}
 
               <div className="flex items-center justify-end gap-2">
+
+                {/* EDIT */}
 
                 <button
                   type="button"
@@ -822,8 +837,12 @@ export default function AdminCategories() {
                   title="Edit"
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition hover:bg-blue-100 disabled:opacity-50"
                 >
+
                   <i className="fa-solid fa-pen-to-square" />
+
                 </button>
+
+                {/* DELETE */}
 
                 <button
                   type="button"
@@ -836,7 +855,9 @@ export default function AdminCategories() {
                   title="Delete"
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 text-red-500 transition hover:bg-red-100 disabled:opacity-50"
                 >
+
                   <i className="fa-solid fa-trash" />
+
                 </button>
 
               </div>
@@ -851,23 +872,27 @@ export default function AdminCategories() {
       ===================================================== */}
 
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 py-4 backdrop-blur-sm">
+
+          {/* SMALL MODAL */}
 
           <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
 
-            {/* MODAL HEADER */}
+            {/* =================================================
+                MODAL HEADER
+            ================================================= */}
 
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
 
               <div>
 
-                <h3 className="text-lg font-semibold text-slate-900">
+                <h3 className="text-base font-semibold text-slate-900">
                   {editingCategory
                     ? "Edit Category"
                     : "Add Category"}
                 </h3>
 
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="mt-0.5 text-[11px] text-slate-400">
                   {editingCategory
                     ? "Update category information."
                     : "Create a new category."}
@@ -879,14 +904,18 @@ export default function AdminCategories() {
                 type="button"
                 onClick={closeModal}
                 disabled={saving}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
               >
-                <i className="fa-solid fa-xmark text-lg" />
+
+                <i className="fa-solid fa-xmark text-base" />
+
               </button>
 
             </div>
 
-            {/* FORM */}
+            {/* =================================================
+                FORM
+            ================================================= */}
 
             <form
               onSubmit={
@@ -894,14 +923,16 @@ export default function AdminCategories() {
                   ? handleEditCategory
                   : handleAddCategory
               }
-              className="px-5 py-4"
+              className="px-4 py-3"
             >
 
-              {/* NAME */}
+              {/* =================================================
+                  CATEGORY NAME
+              ================================================= */}
 
-              <div className="mb-3">
+              <div className="mb-2.5">
 
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-xs font-medium text-slate-700">
                   Category Name
                 </label>
 
@@ -916,16 +947,18 @@ export default function AdminCategories() {
                   }
                   placeholder="Example: Running"
                   disabled={saving}
-                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
                 />
 
               </div>
 
-              {/* IMAGE URL */}
+              {/* =================================================
+                  IMAGE URL
+              ================================================= */}
 
-              <div className="mb-3">
+              <div className="mb-2.5">
 
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-xs font-medium text-slate-700">
                   Image URL
                 </label>
 
@@ -939,26 +972,29 @@ export default function AdminCategories() {
                   }
                   placeholder="https://example.com/image.jpg"
                   disabled={saving}
-                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
                 />
 
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="mt-1 text-[10px] text-slate-400">
                   Paste a direct image URL.
                 </p>
 
               </div>
 
-              {/* IMAGE PREVIEW */}
+              {/* =================================================
+                  IMAGE PREVIEW
+              ================================================= */}
 
-              <div className="mb-4">
+              <div className="mb-2.5">
 
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-xs font-medium text-slate-700">
                   Image Preview
                 </label>
 
-                <div className="flex h-32 w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50">
+                <div className="flex h-20 w-full items-center justify-center overflow-hidden rounded-lg border border-dashed border-slate-300 bg-slate-50">
 
                   {imageUrl.trim() ? (
+
                     <img
                       src={imageUrl}
                       alt="Category preview"
@@ -968,27 +1004,32 @@ export default function AdminCategories() {
                           "none";
                       }}
                     />
+
                   ) : (
+
                     <div className="text-center">
 
-                      <i className="fa-solid fa-image text-2xl text-slate-300" />
+                      <i className="fa-solid fa-image text-xl text-slate-300" />
 
-                      <p className="mt-2 text-xs text-slate-400">
+                      <p className="mt-1 text-[10px] text-slate-400">
                         Image preview
                       </p>
 
                     </div>
+
                   )}
 
                 </div>
 
               </div>
 
-              {/* DESCRIPTION */}
+              {/* =================================================
+                  DESCRIPTION
+              ================================================= */}
 
-              <div className="mb-4">
+              <div className="mb-3">
 
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-xs font-medium text-slate-700">
                   Description
                 </label>
 
@@ -1001,52 +1042,62 @@ export default function AdminCategories() {
                     )
                   }
                   placeholder="Describe this category..."
-                  rows={3}
+                  rows={2}
                   disabled={saving}
-                  className="w-full resize-none rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                  className="w-full resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
                 />
 
               </div>
 
-              {/* BUTTONS */}
+              {/* =================================================
+                  BUTTONS
+              ================================================= */}
 
-              <div className="flex justify-end gap-3">
+              <div className="flex justify-end gap-2">
+
+                {/* CANCEL */}
 
                 <button
                   type="button"
                   onClick={closeModal}
                   disabled={saving}
-                  className="rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-200"
+                  className="rounded-lg bg-slate-100 px-4 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-200"
                 >
                   Cancel
                 </button>
 
+                {/* SAVE */}
+
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-lg bg-red-500 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg bg-red-500 px-4 py-2 text-xs font-medium text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
 
                   {saving ? (
+
                     <>
-                      <i className="fa-solid fa-spinner fa-spin mr-2" />
+                      <i className="fa-solid fa-spinner fa-spin mr-1.5" />
 
                       Saving...
                     </>
+
                   ) : (
+
                     <>
                       <i
                         className={`fa-solid ${
                           editingCategory
                             ? "fa-check"
                             : "fa-plus"
-                        } mr-2`}
+                        } mr-1.5`}
                       />
 
                       {editingCategory
                         ? "Update Category"
                         : "Add Category"}
                     </>
+
                   )}
 
                 </button>
