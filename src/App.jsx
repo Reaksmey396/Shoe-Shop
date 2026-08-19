@@ -23,6 +23,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminCategories from "./pages/AdminCategories";
 import AdminOrder from "./pages/AdminOrder";
 import AdminUser from "./pages/AdminUser";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 export default function App() {
   return (
@@ -106,6 +108,13 @@ export default function App() {
                 path="/admin/users"
                 element={<AdminUser />}
               />
+
+              <Route
+                path="/forgot-password"
+                element={<ForgotPassword />}
+              />
+
+              <Route path="/reset-password" element={<ResetPassword />} />
 
             </Route>
 

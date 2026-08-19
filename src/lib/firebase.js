@@ -27,6 +27,7 @@ let storage = null;
 
 if (isFirebaseConfigured) {
   app = initializeApp(firebaseConfig);
+
   auth = getAuth(app);
   db = getFirestore(app);
   storage = getStorage(app);

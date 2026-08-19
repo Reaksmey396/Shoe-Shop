@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "shoe-store-a8141",
+    "production": "shoe-store-a8141"
+  },
+  "targets": {},
+  "etags": {}
+}
